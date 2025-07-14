@@ -1,0 +1,34 @@
+table_name: "users"
+rows: 30000
+catalog: "main"
+schema: "gold"
+columns:
+  - name: "id"
+    type: "BIGINT"
+    nullable: false
+    comment: "Primary key for users table"
+  
+  - name: "username"
+    type: "STRING"
+    nullable: false
+    comment: "Unique username for the user"
+  
+  - name: "email"
+    type: "STRING"
+    nullable: false
+    comment: "Users email address"
+  
+  - name: "age"
+    type: "INT"
+    nullable: true
+    comment: "Users age in years"
+  
+  - name: "created_at"
+    type: "TIMESTAMP"
+    nullable: false
+    comment: "When the user account was created"
+  
+  - name: "is_active"
+    type: "BOOLEAN"
+    nullable: false
+    comment: "Whether the user account is active" 
