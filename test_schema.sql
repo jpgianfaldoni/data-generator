@@ -1,4 +1,4 @@
-CREATE TABLE main.default.products (
+CREATE TABLE banana (
   product_id STRING NOT NULL COMMENT 'Unique product identifier',
   product_name STRING NOT NULL COMMENT 'Name of the product',
   price DECIMAL(10,2) NOT NULL COMMENT 'Product price in USD',
