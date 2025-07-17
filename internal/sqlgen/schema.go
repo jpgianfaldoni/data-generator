@@ -16,10 +16,11 @@ type TableSchema struct {
 
 // Column represents a single column in the table
 type Column struct {
-	Name     string `yaml:"name"`
-	Type     string `yaml:"type"`
-	Nullable bool   `yaml:"nullable"`
-	Comment  string `yaml:"comment,omitempty"`
+	Name       string `yaml:"name"`
+	Type       string `yaml:"type"`
+	Nullable   bool   `yaml:"nullable"`
+	Comment    string `yaml:"comment,omitempty"`
+	PrimaryKey bool   `yaml:"primary_key,omitempty"`
 }
 
 // GenerateCreateTableSQL generates Databricks SQL CREATE TABLE statement
@@ -33,6 +34,7 @@ func (ts *TableSchema) GenerateCreateTableSQL() string {
 	sql.WriteString(fmt.Sprintf("CREATE TABLE %s (\n", tableName))
 
 	// Add each column
+	var primaryKeyColumns []string
 	for i, col := range ts.Columns {
 		sql.WriteString("  ")
 		sql.WriteString(col.Name)
@@ -40,7 +42,7 @@ func (ts *TableSchema) GenerateCreateTableSQL() string {
 		sql.WriteString(col.Type)
 
 		// Add NULL/NOT NULL constraint
-		if !col.Nullable {
+		if !col.Nullable || col.PrimaryKey {
 			sql.WriteString(" NOT NULL")
 		}
 
@@ -51,12 +53,22 @@ func (ts *TableSchema) GenerateCreateTableSQL() string {
 			sql.WriteString(fmt.Sprintf(" COMMENT '%s'", escapedComment))
 		}
 
-		// Add comma if not the last column
-		if i < len(ts.Columns)-1 {
+		// Track primary key columns
+		if col.PrimaryKey {
+			primaryKeyColumns = append(primaryKeyColumns, col.Name)
+		}
+
+		// Add comma if not the last column or if we have primary keys to add
+		if i < len(ts.Columns)-1 || len(primaryKeyColumns) > 0 {
 			sql.WriteString(",")
 		}
 
 		sql.WriteString("\n")
+	}
+
+	// Add PRIMARY KEY constraint if we have primary key columns
+	if len(primaryKeyColumns) > 0 {
+		sql.WriteString(fmt.Sprintf("  PRIMARY KEY (%s)\n", strings.Join(primaryKeyColumns, ", ")))
 	}
 
 	sql.WriteString(");")

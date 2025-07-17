@@ -29,13 +29,29 @@ func (ts *TableSchema) GenerateInsertSQL() string {
 	sql.WriteString(fmt.Sprintf("INSERT INTO %s (%s) VALUES\n",
 		tableName, strings.Join(columnNames, ", ")))
 
+	// Initialize primary key counters
+	primaryKeyCounters := make(map[string]int64)
+	for _, col := range ts.Columns {
+		if col.PrimaryKey {
+			primaryKeyCounters[col.Name] = 1 // Start from 1 for primary keys
+		}
+	}
+
 	// Generate random data for each row
 	for rowIndex := 0; rowIndex < ts.RowCount; rowIndex++ {
 		sql.WriteString("  (")
 
 		// Generate value for each column
 		for colIndex, col := range ts.Columns {
-			value := generateRandomValue(col.Name, col.Type, col.Nullable)
+			var value string
+			if col.PrimaryKey {
+				// Generate incremental value for primary key
+				value = generatePrimaryKeyValue(col.Type, primaryKeyCounters[col.Name])
+				primaryKeyCounters[col.Name]++
+			} else {
+				// Generate random value for non-primary key columns
+				value = generateRandomValue(col.Name, col.Type, col.Nullable)
+			}
 			sql.WriteString(value)
 
 			// Add comma if not last column
@@ -56,6 +72,18 @@ func (ts *TableSchema) GenerateInsertSQL() string {
 
 	sql.WriteString(";")
 	return sql.String()
+}
+
+// generatePrimaryKeyValue creates incremental values for primary key columns
+func generatePrimaryKeyValue(columnType string, counter int64) string {
+	switch {
+	case strings.Contains(columnType, "STRING") || strings.Contains(columnType, "VARCHAR"):
+		// For string primary keys, create a pattern like "ID_001", "ID_002", etc.
+		return fmt.Sprintf("'ID_%03d'", counter)
+	default:
+		// For all integer types (BIGINT, INT, SMALLINT, TINYINT) and others, use incremental numbers
+		return fmt.Sprintf("%d", counter)
+	}
 }
 
 // generateRandomValue creates random data based on column type using gofakeit

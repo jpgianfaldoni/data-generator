@@ -1,0 +1,36 @@
+table_name: "users"
+catalog: "main"
+schema: "demo" 
+rows: 10
+columns:
+  - name: "user_id"
+    type: "BIGINT"
+    nullable: false
+    primary_key: true
+    comment: "Primary key - unique user identifier"
+  
+  - name: "username"
+    type: "STRING"
+    nullable: false
+    primary_key: true
+    comment: "Username for the user"
+  
+  - name: "email"
+    type: "STRING"
+    nullable: false
+    comment: "User email address"
+  
+  - name: "age"
+    type: "INT"
+    nullable: true
+    comment: "User age in years"
+  
+  - name: "created_at"
+    type: "TIMESTAMP"
+    nullable: false
+    comment: "When the user account was created"
+  
+  - name: "is_active"
+    type: "BOOLEAN"
+    nullable: false
+    comment: "Whether the user account is active" 
